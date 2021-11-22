@@ -1,0 +1,9 @@
+api = "0.2"
+
+[buildpack]
+id = "dev.boson.nodejs"
+version = "0.0.1"
+name = "Node.js Function Buildpack"
+
+[[stacks]]
+id = "dev.boson.stacks.nodejs"

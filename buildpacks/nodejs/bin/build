@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -e
+set -o pipefail
+
+echo "---> Node.js Functions Buildpack"
+
+bp_dir=$(cd "$(dirname "$0")"/..; pwd)
+build_dir=$(pwd)
+layers_dir=$1
+
+source "$bp_dir/lib/build.sh"
+
+install_or_reuse_tools "$layers_dir/tools"
+export PATH=$layers_dir/tools/bin:$PATH
+
+install_invoker "$bp_dir" "$build_dir/.invoker" "$layers_dir/.invoker"
+install_or_reuse_node_modules "$build_dir" "$layers_dir/node_modules"
+
+# TypeScript functions will have a build script
+log_info "Running build if present"
+npm run build --if-present
+
+# Default paths for typescript and javascript
+if [ -f build/index.js ] ; then
+  fn_path="../build"
+else
+  fn_path="../"
+fi
+
+if [ -f package.json ] ; then
+  main=$(cat package.json | jq .main | tr -d '"')
+  if [ $main != "null" ] ; then
+    fn_path="../${main}"
+  fi
+fi
+log_info "Function path ${fn_path}"
+
+install $build_dir "${layers_dir}/app"
+
+# Clean up build dir
+chmod u+w -R $build_dir
+rm -fr $build_dir/* $build_dir/.[a-z]*
+
+cat <<TOML > "${layers_dir}/launch.toml"
+[[processes]]
+type = "web"
+command = "cd ${layers_dir}/app/.invoker && FUNC_PATH=${fn_path} npm start"
+TOML

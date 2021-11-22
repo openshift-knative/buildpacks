@@ -26,12 +26,11 @@ REPO_NAME=$(basename $(git rev-parse --show-toplevel))
 
 # Custom files
 custom_files=$(cat <<EOT | tr '\n' ' '
-openshift
 builders
 buildpacks
 hack
 stacks
-OWNERS
+test
 EOT
 )
 openshift_files_msg=":open_file_folder: update OpenShift specific files"
@@ -45,8 +44,26 @@ git checkout upstream/main -B release-next
 git fetch openshift main
 git checkout openshift/main $custom_files
 
+# Remove builders, buildpacks and stacks that we don't want
+git rm -rf builders/go
+git rm -rf builders/jvm
+git rm -rf builders/python
+git rm -rf builders/quarkus-native
+git rm -rf builders/rust
+git rm -rf buildpacks/go
+git rm -rf buildpacks/python
+git rm -rf buildpacks/quarkus-jvm
+git rm -rf buildpacks/quarkus-native|
+git rm -rf buildpacks/rust
+git rm -rf buildpacks/springboot
+git rm -rf stacks/go
+git rm -rf stacks/jvm
+git rm -rf stacks/python
+git rm -rf stacks/quarkus-native
+git rm -rf stacks/rust
+git rm -rf stacks/ubi8
 git add $custom_files
-git commit -m "${openshift_files_msg}"
+# git commit -m "${openshift_files_msg}"
 
 # git push -f openshift release-next
 

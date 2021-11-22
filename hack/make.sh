@@ -7,27 +7,27 @@ VERSION="${2-tip}"
 REPOSITORY="quay.io/boson"
 PACK_CMD=${PACK_CMD:-pack}
 
-STACKS=(ubi8 nodejs)
+STACKS=(nodejs)
 BUILD_PACKS=(nodejs)
 BUILDERS=(nodejs)
 
 stack_to_run_img() {
     local TAG="${1}-${2}"
-    echo "${REPOSITORY}/faas-stack-run:${TAG}"
+    echo "${REPOSITORY}/serverless-fn-stack-run:${TAG}"
 }
 
 stack_to_build_img() {
     local TAG="${1}-${2}"
-    echo "${REPOSITORY}/faas-stack-build:${TAG}"
+    echo "${REPOSITORY}/serverless-fn-stack-build:${TAG}"
 }
 
-buildpack_to_img() { echo "${REPOSITORY}/faas-${1}-bp:${2}"; }
+buildpack_to_img() { echo "${REPOSITORY}/serverless-fn-${1}-bp:${2}"; }
 
-builder_to_img() { echo "${REPOSITORY}/faas-${1}-builder:${2}"; }
+builder_to_img() { echo "${REPOSITORY}/serverless-fn-${1}-builder:${2}"; }
 
 make_stacks() {
   for STACK in "${STACKS[@]}"; do
-    local STACK_ID="dev.boson.stacks.${STACK}"
+    local STACK_ID="openshift.serverless.functions.${STACK}"
     docker build "stacks/${STACK}/build/" \
       --build-arg "stack_id=${STACK_ID}" \
       --build-arg "version=${VERSION}" \
